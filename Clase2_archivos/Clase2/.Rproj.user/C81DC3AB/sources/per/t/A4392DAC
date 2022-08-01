@@ -1,0 +1,27 @@
+{
+    "id": "A4392DAC",
+    "path": "~/Desktop/DataWrangling/Clase2_archivos/Clase2/importar_archivos.R",
+    "project_path": "importar_archivos.R",
+    "type": "r_source",
+    "hash": "2372592490",
+    "contents": "",
+    "dirty": false,
+    "created": 1659380696191.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "45,20",
+        "scrollLine": "24"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1659384898,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1659384898581,
+    "read_only": false,
+    "read_only_alternatives": []
+}
