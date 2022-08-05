@@ -16,7 +16,7 @@ excel_sheets('example_1.xlsx') # ver las hojas de excel que tenemos
 excel_2 <- read_excel('example_1.xlsx', sheet = 2) ## puede ser el número o el nombre de la hoja
 
 #exportaar el excel
-write_excel_csv2(excel, "exportar_excel.xls", delim = ",")
+write_excel_csv2(excel, "exportar_excel1.xls", delim = ",")
 #-------------CSV/TXT----------------
 # separado por comas
 csv <- read_csv("example_2.csv")

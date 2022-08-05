@@ -5,14 +5,15 @@ date: "2022-08-03"
 output: rmarkdown::github_document
 ---
 ### Librerias
-```{r setup, include=FALSE}
+```{r}
 knitr::opts_chunk$set(echo = TRUE)
 library(readxl)
 library(readr)
 library(tidyverse)
 library(tidytext)
+library(tibble)
 ```
-
+### PARTE 1
 ### Leer los xlsx
 ```{r}
 excel01 <- readxl::read_excel('01-2018.xlsx')
@@ -28,17 +29,74 @@ excel10 <- readxl::read_excel('10-2018.xlsx')
 excel11 <- readxl::read_excel('11-2018.xlsx')
 ```
 
-### Merge de los datasets
+
+### Agregando la columna de FECHA
 ```{r}
-generate_df <-  function(tamanio){ return(
-    data.frame(
-      mes = sample(1, size = tamanio, replace = TRUE)
-    )
-  )
-}
+# necesito: FECHA, COD_VIAJE, CLIENTE, UBICACIÓN, CANTIDAD, PILOTO, Q, CREDITO, UNIDAD
 
+#add_column(dataset, "Primera" = 4:8, .before = 1)
+a1 <- as.numeric(nrow(excel01))
+fecha_ = "01-2018"
+FECHA <- rep(fecha_, a1)
+excel01 <- add_column(excel01, FECHA, .before = 1)
 
+a1 <- as.numeric(nrow(excel02))
+fecha_ = "02-2018"
+FECHA <- rep(fecha_, a1)
+excel02 <- add_column(excel02, FECHA, .before = 1)
 
+a1 <- as.numeric(nrow(excel03))
+fecha_ = "03-2018"
+FECHA <- rep(fecha_, a1)
+excel03 <- add_column(excel03, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel04))
+fecha_ = "04-2018"
+FECHA <- rep(fecha_, a1)
+excel04 <- add_column(excel04, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel05))
+fecha_ = "05-2018"
+FECHA <- rep(fecha_, a1)
+excel05 <- add_column(excel05, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel06))
+fecha_ = "06-2018"
+FECHA <- rep(fecha_, a1)
+excel06 <- add_column(excel06, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel07))
+fecha_ = "07-2018"
+FECHA <- rep(fecha_, a1)
+excel07 <- add_column(excel07, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel08))
+fecha_ = "08-2018"
+FECHA <- rep(fecha_, a1)
+excel08 <- add_column(excel08, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel09))
+fecha_ = "09-2018"
+FECHA <- rep(fecha_, a1)
+excel09 <- add_column(excel09, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel10))
+fecha_ = "10-2018"
+FECHA <- rep(fecha_, a1)
+excel10 <- add_column(excel10, FECHA, .before = 1)
+
+a1 <- as.numeric(nrow(excel11))
+fecha_ = "11-2018"
+FECHA <- rep(fecha_, a1)
+excel11 <- add_column(excel11, FECHA, .before = 1)
+
+Data_final <- rbind(excel01[,c(1,2,3,4,5,6,7,8,9)],excel02[,c(1,2,3,4,5,6,7,8,9)]
+                    ,excel03[,c(1,2,3,4,5,6,7,8,9)],excel04[,c(1,2,3,4,5,6,7,8,9)]
+                    ,excel05[,c(1,2,3,4,5,6,7,8,9)],excel06[,c(1,2,3,4,5,6,7,8,9)]
+                    ,excel07[,c(1,2,3,4,5,6,7,8,9)],excel08[,c(1,2,3,4,5,6,7,8,9)]
+                    ,excel09[,c(1,2,3,4,5,6,7,8,9)],excel10[,c(1,2,3,4,5,6,7,8,9)],
+                    excel11[,c(1,2,3,4,5,6,7,8,9)])
+Data_final
 ```
 
 
@@ -46,6 +104,41 @@ generate_df <-  function(tamanio){ return(
 ### Exportación del archivo
 ```{r}
 #exportaar el excel
-write_excel_csv2(excel, "exportar_excel.xls", delim = ",")
+write_excel_csv2(Data_final, "Data_final.xls", delim = ",")
+```
+
+
+### PARTE 2
+
+### Moda de cada vector de la lista
+```{r}
+# Función de moda
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+# Función que crea un vector aleatoria de numeros
+generate_numbers <-  function(x, tamanio){ return(
+      b = sample(1:10, size = tamanio, replace = TRUE)
+  )
+}
+## llenar la lista
+lista <- lapply(1:3, generate_numbers, tamanio = 15) 
+# LLamar a la función de moda, con la lista. 
+result <- lapply(lista, getmode)
+print(lista)
+print(result)
+
+
+```
+
+### PARTE 3
+
+```{r}
+
+
+txt_1 <-read_delim('INE_PARQUE_VEHICULAR_080219.txt', delim = "|")
+
+txt_1
 ```
 

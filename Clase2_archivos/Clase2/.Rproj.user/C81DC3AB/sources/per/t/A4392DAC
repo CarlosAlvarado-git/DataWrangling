@@ -3,7 +3,7 @@
     "path": "~/Desktop/DataWrangling/Clase2_archivos/Clase2/importar_archivos.R",
     "project_path": "importar_archivos.R",
     "type": "r_source",
-    "hash": "2372592490",
+    "hash": "586035662",
     "contents": "",
     "dirty": false,
     "created": 1659380696191.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "9,0",
-        "scrollLine": "0"
+        "cursorPosition": "22,9",
+        "scrollLine": "13"
     },
     "folds": "",
-    "lastKnownWriteTime": 1659384898,
+    "lastKnownWriteTime": 1659737960,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1659384898581,
+    "last_content_update": 1659737960561,
     "read_only": false,
     "read_only_alternatives": []
 }
