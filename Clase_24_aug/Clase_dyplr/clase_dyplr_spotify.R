@@ -1,6 +1,7 @@
 library(readr)
 library(tidyverse)
-library(highcharter)
+library(highcharter) #graficas
+library(plotly) #graficas
 csv <- read_delim("docclase.csv", ";", escape_double = FALSE)
 ### 
 str(csv)
@@ -69,7 +70,7 @@ csv %>%
     group_by(title) %>%
     summarise(conteo_canciones = n()) %>%
     filter(conteo_canciones > 1) %>%
-    arrange(desc(conteo_canciones))
+    arrange(desc(conteo_canciones)) #es el limit
 
 ### como lo hizo tepi
   csv %>%
@@ -77,4 +78,36 @@ csv %>%
     summarise(repeticiones = n()) %>%
     group_by(repeticiones) %>%
     summarise(cantidad_de_canciones = n())
+  
+
+  
+##### clase de agosto 29 
+df <- read_delim("docclase.csv", ";", escape_double = FALSE, trim_ws = TRUE)
+
+df <- mutate(df, is.character, as.factor)
+df$title <- iconv(df$title, to = "UTF-8")
+df$artist <- iconv(df$artist, to = 'UTF-8')
+
+df %>%
+  select(year, artist) %>%
+  group_by(year) %>%
+  summarise(n = n_distinct(artist)) %>%
+  hchart("column", hcaes(x = year, y = n)) %>% #hcaes es el set up de la grafica. 
+  hc_title(text = "<b>Artistas distintos por año </b>") %>%
+  hc_subtitle(text = "<i>2019 tuvo la menor variedad, mientras 2015 ha sifo con más diversidad de artistas </i>")
+
+#Top 5 artistas con mayor cantidad de canciones populares
+
+
+df %>%
+  select(artist, title) %>%
+  group_by(artist) %>%
+  summarise(n = n_distinct(title)) %>%
+  filter(n > 13) %>%
+  arrange(desc(n)) %>%
+  hchart("bar", hcaes(x = artist, y = n)) %>%
+  hc_title(text = "<b>Top 5 artistas con mayor cantidad de canciones populares </b>") %>%
+  hc_subtitle(text = "<i>Katy Perry tiene el mayor número de canciones populares. 
+              Justin Bieber, Lady Gaga y Maroon5 son top 3 con 14</i>")
+
   

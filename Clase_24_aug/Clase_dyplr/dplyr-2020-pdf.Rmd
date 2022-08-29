@@ -1,0 +1,443 @@
+---
+title: "Manipulación de datos con dplyr"
+author: "Tepi"
+date: "8/23/2020"
+output: pdf_document
+---
+### Objetivos 
+
+1. Aprender las funciones básicas de la librería ``dplyr``.
+2. Familiarizarse con el de pipelines de funciones.
+3. Introducción a EDA, paquete ``highchart``.
+
+
+#### Importando librerías y estableciendo directorio de trabajo.
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+
+
+library(tidyverse)
+library(highcharter)
+library(readr)
+setwd("~/GitHub/spotify-dplyr")
+
+```
+
+
+![](spotify.png) 
+
+### Analizaremos las canciones más populares en spotify para los años 2010 - 2019. 
+
+
+
+##### Importando el dataset. 
+
+```{r,cache=TRUE, warning=FALSE, message=FALSE}
+
+df <- read_csv("2010-2019-top.csv")
+df$title <- iconv(df$title, to = "UTF-8")
+df$artist <- iconv(df$artist, to = "UTF-8")
+
+
+```
+
+#### Descripción 
+
+El dataset cuenta con 603 columnas y 15 variables.
+
+#### Variables
+* __title__: song's title.
+* __artist__: song's artist.
+* __top genre__: the genre of the track.
+* __year__: song's year in the Billboard.
+* __bpm__: beats per minute, the tempo of the song.
+* __nrgy__: the energy of the song - the higher the value, the more energetic.
+* __dnce__: danceability the higher the value, the easier it is to dance to this song.
+* __dB__: loudness. The higher the value, the louder the song.
+* __live__: liveness. The higher the value, the more likely the song is a live recording.
+* __val__: valence - the higher the value, the more positive mood for the song.
+* __dur__: length - the duration of the song.
+
+
+# dplyr 
+
+dplyr es una de las librerías más populares e importantes en R para el manejo, limpieza y extracción de datos. Es parte del conjunto de librerías de tidyverse creado por Hadley. 
+
+La librería tiene como objetivos: 
+
+* Identificar las herramientas y tareas más comunes e importantes necesarias analisis de datos y hacerlas fácilmente accesibles y utilizables en R.
+
+* Proveerle al usuario un rápido desempeño. (Las funciones de esta librería están escritas en C++).
+
+* Usar la misma interface y metodología para trabajar sin importar en donde se almacene la data.
+
+
+Personalmente, dplyr fue la librería que me hizo apreciar R y disfrutar jugar con diferentes set datos. Al inicio resulta tedioso familiarizarse con las distintas funciones que base R tiene. dplyr es bastante intuitivo y sencillo para trabajar.
+
+
+
+
+## base r vs ``dplyr``
+
+En sesiones anteriores hemos estado utilizando comandos en R para empezar a extraer información.
+dplyr y el tidyverse contiene análogas y similares. Usar todo este conjunto de funciones se vuelve útil porque "estandariza" los parámetros y las llamadas a las operaciones que queremos realizar. 
+
+### str() vs glimpse()
+
+Anteriormente utilizábamos la función ``str()`` para explorar la estructura de nuestro set de datos. *dplyr* cuenta con su propia función llamada ``glimpse()``
+
+
+```{r,cache=TRUE, warning=FALSE, message=FALSE, results='hide'}
+
+glimpse(df)
+str(df)
+
+```
+
+
+### Renombrando columnas.
+
+Podemos observar que la variable de _top genre_ fue cargada a R con un espacio en blanco de por medio. Renombremos esta variable.  En sesiones anteriores, utilizábamos la función ```names()``` y llamábamos la posición de la variable en el data frame. dplyr cuenta con su propia función llamada ```rename()```. 
+
+Renombremos la columna _top genre_ como vimos en las sesiones anteriores:
+
+```{r, cache=FALSE}
+names(df)[4] <- "top_genre"
+
+```
+
+Renombrar las columnas del dataframe de esta manera puede presentar ciertos inconvenientes.
+¿Cuáles creen que pueden ser algunos de estos?
+
+1. Necesitamos saber la posición exacta de la columna. En datasets donde tengamos n cantidad de variables, esto puede resultar tedioso y problemático. 
+
+2. No restringe que se haga uno por uno, pero si quisieramos cambiar múltiples columnas a la vez, tenemos que pensar en como armar los vectores de los nombres de la columna. Esto requiere tiempo.
+
+*Conclusión*: Nombrar por posición relativa no resulta escalable.
+
+Utilicemos las funciones de ``dplyr`` 
+
+```{r, cache=TRUE}
+
+rename(df,`top genre`=top_genre )
+
+```
+
+
+# pipe operator %>% 
+
+Originario del paquete _magrittr_, este operador permite _canalizar (pipe)_  la salida de una funcion como entrada de otra función. En lugar de _anidar (nest)_ funciones, esto permite leer las funciones de izquierda a derecha. 
+
+Veamos un  ejemplo sencillo utilizando la función ``head()`` y el verbo ``select()`` de *dplyr*:
+
+```{r, cache=TRUE}
+##seleccionamos dos columnas del dataframe y mostramos las primeras cinco posiciones
+
+head(select(df, artist, year))
+
+```
+
+Utilizando el operador %>%:
+
+```{r, cache=TRUE}
+##seleccionamos dos columnas del dataframe y mostramos las primeras cinco posiciones
+
+df %>% 
+  select(artist,year) %>% 
+  head()
+
+```
+Obtenemos de salida el mismo resultado. Sin embargo, es mucho más intuitivo de leer y más ordenado. A medida que nuestra conjugación de funciones se torne más extensa y compleja, se vuelve más sencillo cometer errores de sintáxis por paréntesis. 
+
+Otra ventaja es que las funciones se pueden leer como un flujo de pensamiento lógico: del dataframe quiero seleccionar ciertas columnas y desplegar las primera 5. Esta lectura no es tan evidente anidando funciones. 
+
+Regresando a nombrar las columnas: 
+
+
+```{r, cache=TRUE}
+
+df %>% 
+  rename(`top genre`= top_genre)
+
+```
+
+
+Asumamos que tenemos n variables y que no podemos ver una por una si fueron cargadas correctamente. Una forma de la cual nos podemos asegurar, antes de iniciar a trabajar, que las columnas estén un formato deseado es renombrarla con base a ciertas condiciones. Por ejemplo, podemos sustituir los espacios en blanco por un _. También podemos validar que los nombres de las columnas se encuentren en minúscula.
+
+Utilizaremos la función ``rename_with()``: 
+
+```{r, cache=TRUE}
+rename_with(df, ~(gsub(" ","_",.x)))
+
+```
+
+Automáticamente cambiamos todas las variables que tienen un espacio en blanco.
+También podriamos validar por las columnas para ponerlas todas en minúscula. 
+
+
+```{r, cache=TRUE}
+df<-rename_with(df, ~tolower(gsub(" ","_",.x)))
+
+```
+
+Como podemos ver, la variable X1 ahora es x1.
+
+Ejercicio en clase: Pueden realizar estas operaciones utilizando %>%? 
+
+### Seleccionar columnas 
+
+Con base R seleccionábamos columnas específicas del set datos utilizando filtros de vectores.
+Esto, ahora lo podemos hacer fácilmente con el verbo ``select()``:
+
+```{r}
+##utilizando base r: 
+head(df[c(1,2)])
+
+```
+Utilizando ``select()`` y ``%>%`` : 
+
+```{r, cache=TRUE}
+##utilizando dplyr: 
+df %>% 
+  select(1,2) %>% 
+  head()
+
+df %>% 
+  select(x1,title) %>% 
+  head()
+
+```
+
+También podemos hacer lo mismo para filtrar las columnas con la cuales no vamos a trabajar en nuestro set de datos: 
+
+
+
+```{r, cache=TRUE, results='hide'}
+##utilizando base r: 
+
+head(df[-1])
+
+```
+
+
+
+
+
+```{r,cache=TRUE, results='hide'}
+##utilizando dplyr : 
+df %>% 
+  select(-1) %>% 
+  head()
+
+df %>% 
+  select(-x1) %>% 
+  head()
+
+
+```
+
+## Volver columnas de texto a factores:
+
+Para el caso de nuestro dataset, las columnas de texto y artista la podemos convertir en un factor. Podemos realizar transformaciones a columnas si ciertas condiciones se cumplen utilizando la función de dplyr ``mutate_if()_``:
+
+```{r, cache=TRUE}
+df<-mutate_if(df,is.character, as.factor)
+
+```
+
+
+
+
+
+
+
+## Seleccionar variables filtrando por valores: 
+
+El verbo ``filter()`` permite seleccionar particiones de nuestro dataset basado en alguna condición: 
+
+
+```{r,cache=TRUE}
+##utilizando dplyr : 
+df %>%
+  select(artist,title,year) %>%  
+  filter(year == 2010)
+
+```
+
+## Agregaciones 
+
+Una pieza fundamental al momento de hacer análisis de dato es generar agregaciones y sumarizaciones *agrupando por características similares*. Generar grupos y conjuntos de nuestro set de datos nos puede dar una visión más clara de la naturaleza de los mismos, de su comportamiento en el tiempo y, en el caso de modelaje estadístico e inferencia, su distribución de probabilidad. 
+
+También son importantes porque nos permiten conocer nuestro set de datos. 
+
+## ``summarise()`` y ``group_by()``
+
+``group_by()`` toma un set de dataframe existente y lo convierte a _grouped dataframe_ donde se realizan operaciones definidas por los grupos. En conjunto con ``summarise()``, podemos generar dataframes que contengan en las columnas las variables utilizadas para agrupar y las agregaciones que nosotros definimos.
+
+
+
+
+```{r,cache=TRUE}
+###### cuantos artistas tenemos por año? 
+df %>%
+  select(year,artist) %>%
+  group_by(year) %>% 
+  summarise(n = n())
+
+```
+
+¿Qué problema tenemos con esta agregación?
+
+Estamos contando la cantidad de artistas por año. Esto es equivalente a contar cuantas filas tenemos por cada uno de los años.
+
+Tampoco estamos considerando la posibilidad de si podemos tener artistas repetidos en los mismos años, es decir, si estamos contabilizando el mismo artista más de una vez. 
+
+Para responder esto, utilizaremos la función``n_distinct()``:
+
+```{r,cache=TRUE}
+###### cuantos artistas tenemos? 
+df %>%
+  summarise(n = n_distinct(artist))
+
+####tenemos 184 artistas únicos. 
+```
+
+Aparentemente, ¡el top de canciones más populares de los últimos 10 años fue generado por únicamente 184 artistas!
+
+
+
+```{r,cache=TRUE, warning=FALSE}
+###### cuantos artistas distintos tenemos por año? 
+df %>%
+  select(year,artist) %>%
+  group_by(year) %>% 
+  summarise(n = n_distinct(artist))
+
+
+```
+
+
+
+
+¿Y canciones? 
+
+```{r,cache=TRUE}
+###### cuantas canciones distintas tenemos? 
+df %>%
+  summarise(n = n_distinct(title))
+
+
+###tenemos 584 canciones diferentes.
+```
+
+¿Si tenemos 603 observaciones y 584 canciones distintas, que podemos inferir de nuestro set de datos?
+
+Tenemos canciones que fueron muy populares distintos años calendario. Corroboremos esto de dos maneras:
+
+
+```{r, cache=TRUE}
+#cuantas canciones aparecen más de una vez? 
+#Sabemos que tienen que ser 19 pero confirmemos el dato:
+
+df %>%
+  group_by(title) %>% 
+  summarise(freq = n()) %>% 
+  #ungroup() %>% 
+  group_by(freq) %>% 
+  summarise(n())
+
+##Haciendo un conteo del conteo:
+
+df %>% 
+  group_by(title) %>% 
+  count() %>% 
+  filter(n>1) %>% 
+  ungroup() %>% 
+  count(n)
+
+```
+
+Efectivamente, son 19. ¿Qué canciones son?
+
+
+```{r, cache=TRUE}
+#Que canciones de qué artistas aparecen en más de un año
+
+df %>% 
+  group_by(artist,title) %>% 
+  count() %>% 
+  filter(n>1) %>% 
+  arrange(artist)
+
+```
+
+Del set de datos, ¿cuáles artistas han tenido más de una canción que fue popular en más de un año?
+
+```{r, cache=TRUE}
+#### #Del set de datos, que artistas han tenido más de una canción que fue popular en más de un año?
+
+####Solo Bruno Mars y Justin Bieber lograron esto:
+
+df %>% 
+  group_by(artist,title) %>% 
+  count() %>% 
+  filter(n>1) %>% 
+  group_by(artist) %>% 
+  summarise(artist_songs = n()) %>% 
+  arrange(desc(artist_songs)) 
+
+```
+Solo Bruno Mars y Justin Bieber lograron esto en los últimos 10 años. 
+
+
+
+
+
+# Highcharter
+
+Ya hemos visto como generar tablas y agregaciones de nuestro set de datos. Algo que también es importante al comunicar nuestro trabajo es comunicar lo que estamos haciendo, y una de las formas más efectivas es través de representaciones gráficas. 
+
+Utilizaremos la librería de *Highcharter* para generar unas visualizaciones simples sobre las tablas que hemos obtenido, utilizando las funciones que hemos visto en el momento.
+
+
+
+```{r,cache=TRUE, warning=FALSE, message=FALSE}
+###### cuantos artistas distintos tenemos por año? 
+
+df<-mutate_if(df,is.character, as.factor)
+df$title <- iconv(df$title, to = "UTF-8")
+df$artist <- iconv(df$artist, to = "UTF-8")
+
+
+df %>%
+  select(year,artist) %>%
+  group_by(year) %>% 
+  summarise(n = n_distinct(artist)) %>% 
+  hchart("column", hcaes(x = year, y = n)) %>% 
+  hc_title(text = "<b>Artistas distintos por año </b>") %>% 
+  hc_subtitle(text = "<i>2019 tuvo la menor variedad, mientras 2015 ha sido el año con más diversidad de artistas. </i>")
+
+
+
+df %>%
+  select(artist,title) %>%
+  group_by(artist) %>% 
+  summarise(songs = n_distinct(title)) %>% 
+  arrange(desc(songs)) %>%
+  filter(songs > 5) %>% 
+  hchart('column', hcaes(x = artist, y = songs))  %>% 
+  hc_title(text = "<b>Artistas con mayor cantidad de canciones populares </b>") %>% 
+  hc_subtitle(text = "<i> No puedo creeer que The Chainsmokers tenga más de 10 canciones. </i>")
+
+
+
+```
+
+
+
+```{r,cache=TRUE, warning=FALSE, message=FALSE}
+
+
+```
+
+
