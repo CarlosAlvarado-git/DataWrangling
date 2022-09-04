@@ -1,6 +1,8 @@
 library(readr)
 library(dplyr)
 library(stringr)
+library(highcharter) #graficas
+library(plotly)
 df <- read.csv('tabla_completa.csv', sep = ',')
 df1 <- read.csv('tabla_completa_v1.csv', sep = ',')
 df1 <- select(df1, -X.1, -X.2, -X.3)
@@ -29,28 +31,30 @@ df$CLIENTE <- iconv(df$CLIENTE, to = 'UTF-8')
 df$CLIENTE <- str_remove_all(df$CLIENTE, " ")
 
 
-
+#---------
 #Ver cuentos faltantes hay 
 df %>%
-  select(faltante, despacho_cliente, devolucion) %>%
+  select(faltante, despacho_cliente, devolucion, CANTIDAD) %>%
   filter(faltante == 1) %>%
   filter(is.na(despacho_cliente)) %>%
   filter(is.na(devolucion)) %>%
-  summarise(faltantes = n())
+  summarise(faltantes = n(), promedio = mean(CANTIDAD))
+
+
 #ver despacho a cliente
 df %>%
-  select(faltante, despacho_cliente, devolucion) %>%
+  select(faltante, despacho_cliente, devolucion, CANTIDAD) %>%
   filter(despacho_cliente == 1) %>%
   filter(is.na(faltante)) %>%
   filter(is.na(devolucion)) %>%
-  summarise(despacho_clientes = n())
+  summarise(despacho_clientes = n(), promedio = mean(CANTIDAD))
 #ver devolucion
 df %>%
-  select(faltante, despacho_cliente, devolucion) %>%
+  select(faltante, despacho_cliente, devolucion, CANTIDAD) %>%
   filter(devolucion == 1) %>%
   filter(is.na(despacho_cliente)) %>%
   filter(is.na(faltante)) %>%
-  summarise(devoluciones = n())
+  summarise(devoluciones = n(), promedio = mean(CANTIDAD))
 
 
 
@@ -64,11 +68,11 @@ df %>%
 
 # sin clasificacion/ extra
 df %>%
-  select(faltante, despacho_cliente, devolucion) %>%
+  select(faltante, despacho_cliente, devolucion, CANTIDAD) %>%
   filter(is.na(faltante)) %>%
   filter(is.na(despacho_cliente)) %>%
   filter(is.na(devolucion)) %>%
-  summarise(sincat = n())
+  summarise(sincat = n(), promedio = mean(CANTIDAD))
 
 
 
@@ -105,18 +109,19 @@ df %>%
 #Transporte con faltante
 df %>%
   select(UNIDAD, faltante, CANTIDAD, despacho_cliente, devolucion) %>%
-  filter(faltante == 1) %>%
-  filter(is.na(despacho_cliente)) %>%
   filter(is.na(devolucion)) %>%
+  filter(is.na(faltante)) %>%
+  filter(is.na(despacho_cliente)) %>%
   group_by(UNIDAD) %>%
-  summarise(cant_viajes = n(),can_unidades = sum(CANTIDAD)) 
+  summarise(cant_viajes = n(),can_unidades = sum(CANTIDAD), promedio = mean(CANTIDAD)) 
 
 #CLIENTES VIAJES
 df %>%
   select(CLIENTE) %>%
   group_by(CLIENTE) %>%
   summarise(pedidos = n()) %>%
-  arrange(desc(pedidos))
+  arrange(desc(pedidos)) %>%
+  hchart("column", hcaes(x = CLIENTE, y = pedidos))
 
 #clientes con faltante
 df %>%
@@ -125,7 +130,96 @@ df %>%
   filter(is.na(despacho_cliente)) %>%
   filter(is.na(devolucion)) %>%
   group_by(CLIENTE) %>%
-  summarise(pedidos = n(), faltantes = sum(faltante)) 
+  summarise(faltantes = sum(faltante)) %>%
+  arrange(desc(faltantes))
+df %>%
+  select(MES, faltante, despacho_cliente, devolucion) %>%
+  filter(faltante == 1) %>%
+  filter(is.na(despacho_cliente)) %>%
+  filter(is.na(devolucion)) %>%
+  group_by(MES) %>%
+  summarise(faltantes = sum(faltante)) %>%
+  filter(faltantes > 53) %>%
+  hchart("column", hcaes(x = MES, y = faltantes))
 
+#clientes con despacho
+df %>%
+  select(CLIENTE, faltante, despacho_cliente, devolucion) %>%
+  filter(despacho_cliente == 1) %>%
+  filter(is.na(faltante)) %>%
+  filter(is.na(devolucion)) %>%
+  group_by(CLIENTE) %>%
+  summarise(despacho_cliente = sum(despacho_cliente)) %>%
+  arrange(desc(despacho_cliente))
 
+#clientes con devolucion
+df %>%
+  select(faltante, despacho_cliente, devolucion, CANTIDAD, CLIENTE) %>%
+  filter(is.na(devolucion)) %>%
+  filter(is.na(despacho_cliente)) %>%
+  filter(is.na(faltante)) %>%
+  group_by(CLIENTE) %>%
+  summarise(viajes = n()) %>% arrange(desc(viajes))
 
+#CLIENTES SIN CAT
+df %>%
+  select(faltante, despacho_cliente, devolucion, CLIENTE, CANTIDAD) %>%
+  filter(is.na(faltante)) %>%
+  filter(is.na(despacho_cliente)) %>%
+  filter(is.na(devolucion)) %>%
+  group_by(CLIENTE) %>%
+  summarise(sincat = n(), cant = mean(CANTIDAD))
+#--------------------
+
+#viajes por piloto:
+df %>%
+  select(PILOTO, UNIDAD) %>%
+  group_by(PILOTO, UNIDAD) %>%
+  summarise(viajes = n()) %>%
+  arrange((PILOTO)) %>%
+  print(n = 28)
+  
+  hchart("column", hcaes(x = PILOTO, y = viajes))
+#viajes por piloto faltantes
+df %>%
+  select(PILOTO, faltante, despacho_cliente, devolucion) %>%
+  filter(faltante == 1)%>%
+  filter(is.na(despacho_cliente)) %>%
+  filter(is.na(devolucion)) %>%
+  group_by(PILOTO) %>%
+  summarise(viajes = n()) %>%
+  hchart("column", hcaes(x = PILOTO, y = viajes))
+#viajes por piloto faltantes y despacho_cliente
+df %>%
+  select(PILOTO, faltante, despacho_cliente, devolucion) %>%
+  filter(faltante == 1)%>%
+  filter(despacho_cliente == 1) %>%
+  filter(is.na(devolucion)) %>%
+  group_by(PILOTO) %>%
+  summarise(viajes = n()) %>%
+  hchart("column", hcaes(x = PILOTO, y = viajes))
+
+#viajes por ubicacion
+df %>%
+  select(UBICACION) %>%
+  group_by(UBICACION) %>%
+  summarise(n = n())
+
+#ventas por clientes
+
+df %>%
+  select(CLIENTE, Q, devolucion) %>%
+  filter(is.na(devolucion)) %>%
+  group_by(CLIENTE) %>%
+  summarise(ventas = sum(Q)) %>%
+  arrange(desc(ventas)) %>%
+  hchart("column", hcaes(x = CLIENTE, y = ventas))
+
+df %>%
+  select(MES, faltante, despacho_cliente, devolucion) %>%
+  filter(is.na(faltante))%>%
+  filter(devolucion == 1) %>%
+  filter(is.na(despacho_cliente)) %>%
+  group_by(MES) %>%
+  summarise(n = n()) %>%
+  filter(n > 11)
