@@ -182,13 +182,11 @@ df %>%
   hchart("column", hcaes(x = PILOTO, y = viajes))
 #viajes por piloto faltantes
 df %>%
-  select(PILOTO, faltante, despacho_cliente, devolucion) %>%
-  filter(faltante == 1)%>%
-  filter(is.na(despacho_cliente)) %>%
-  filter(is.na(devolucion)) %>%
+  select(PILOTO) %>%
   group_by(PILOTO) %>%
   summarise(viajes = n()) %>%
-  hchart("column", hcaes(x = PILOTO, y = viajes))
+  hchart("column", hcaes(x = PILOTO, y = viajes)) %>%
+  hc_title(text = "<b> Viajes por piloto </b>")
 #viajes por piloto faltantes y despacho_cliente
 df %>%
   select(PILOTO, faltante, despacho_cliente, devolucion) %>%
