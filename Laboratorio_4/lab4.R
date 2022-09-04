@@ -213,13 +213,36 @@ df %>%
   group_by(CLIENTE) %>%
   summarise(ventas = sum(Q)) %>%
   arrange(desc(ventas)) %>%
-  hchart("column", hcaes(x = CLIENTE, y = ventas))
+  hchart("column", hcaes(x = CLIENTE, y = ventas)) %>%
+  hc_title(text = "<b> Ventas por cliente </b>") %>%
+  hc_subtitle(text = "<i>  </i>")
 
 df %>%
   select(MES, faltante, despacho_cliente, devolucion) %>%
-  filter(is.na(faltante))%>%
-  filter(devolucion == 1) %>%
+  filter(is.na(devolucion))%>%
+  filter(faltante == 1) %>%
   filter(is.na(despacho_cliente)) %>%
   group_by(MES) %>%
   summarise(n = n()) %>%
-  filter(n > 11)
+  filter(n > 54)
+
+df %>%
+  select(MES) %>%
+  group_by(MES) %>%
+  summarise(cant = n()) %>%
+  filter(cant > 198) %>%
+  hchart("column", hcaes(x = MES, y = cant)) %>%
+  hc_title(text = "<b> Meses con viajes por encima del promedio </b>") %>%
+  hc_subtitle(text = "<i> Promedio de 198 </i>")
+
+df %>%
+  select(CREDITO, CLIENTE, devolucion) %>%
+  filter(is.na(devolucion)) %>%
+  filter(CREDITO == 30) %>%
+  group_by(CREDITO, CLIENTE) %>%
+  summarise(total = n()) %>%
+  arrange(desc(total))
+
+df %>%
+  select(Q) %>%
+  summarise(n = sum(Q))
