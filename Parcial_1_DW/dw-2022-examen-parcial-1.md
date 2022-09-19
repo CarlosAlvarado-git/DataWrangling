@@ -99,6 +99,67 @@ territorios cuyas pérdidas sean “considerables”. Bajo su criterio,
 
 ### I. Preguntas teóricas: 1, 2, 7, 9, 10
 
+# 1. Para las siguientes sentencias de `base R`, liste su contraparte de `dplyr`:
+
+Respuesta:
+
+``` r
+# `str()` 
+#      R1: `dplyr`:``
+# `df[,c("a","b")]`
+#      R2: 
+# `names(df)[4] <- "new_name"` donde la posición 4 corresponde a la variable `old_name`
+#      R3: `dplyr`:`rename(df, "new_name" = "old_name")`    
+# `df[df$variable == "valor",]`
+#      R4: 
+```
+
+# 2. Al momento de filtrar en SQL, ¿cuál keyword cumple las mismas funciones que el keyword `OR` para filtrar uno o más elementos una misma columna?
+
+Respuesta: se puede usar la keyword: `|`.
+
+      Por ejemplo:
+      library(dplyr)
+        parcial_anonimo %>% 
+          filter(Pais == '4046ee34' | Pais == '4046ee35')
+
+# 7. ¿Qué pasa si quiero agregar una nueva categoría a un factor que no se encuentra en los niveles existentes?
+
+Respuesta: Para agregar un nuevo nivel de factor, no hay problema. Solo
+se debe de sobre escribir en los levels del factor, un vector de los
+levels ya existentes y luego agregar como segundo valor del vector el
+nuevo factor.
+
+``` r
+#ejemplo link:
+#https://stackoverflow.com/questions/23316815/add-extra-level-to-factors-in-dataframe 
+f1 <- factor(c("a", "a", NA, NA, "b", NA, "a", "c", "a", "c", "b"))
+str(f1)
+```
+
+    ##  Factor w/ 3 levels "a","b","c": 1 1 NA NA 2 NA 1 3 1 3 ...
+
+``` r
+levels(f1) <- c(levels(f1),"No Answer")
+f1[is.na(f1)] <- "No Answer"
+str(f1)
+```
+
+    ##  Factor w/ 4 levels "a","b","c","No Answer": 1 1 4 4 2 4 1 3 1 3 ...
+
+# 9. En SQL, ¿para qué utilizamos el keyword `HAVING`?
+
+Respuesta: En SQL la keyword HAVING es como un where o una forma de
+realizar comparaciones luego de haber usado la keyword: group_by. Es
+para cuando el where no soporta funciones de agrupación.
+
+# 10. Si quiero obtener como resultado las filas de la tabla A que no se encuentran en la tabla B, ¿cómo debería de completar la siguiente sentencia de SQL?
+
+        SELECT * FROM A _______ B ON A.KEY = B.KEY WHERE __________ = __________
+
+Respuesta: - SELECT \* FROM A ***LEFT JOIN TableB*** B ON A.KEY = B.KEY
+WHERE **B.key** **IS NULL**
+
 ## A
 
 ``` r
