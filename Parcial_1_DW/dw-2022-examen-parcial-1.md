@@ -206,6 +206,20 @@ cliente_paises <- parcial_anonimo %>%
     ## `summarise()` has grouped output by 'Cliente'. You can override using the
     ## `.groups` argument.
 
+``` r
+# Clientes ccon más de un pais
+clientes_mas <- cliente_paises %>%
+                count(Cliente) %>%
+                filter(n > 1)
+# Clientes más rentables
+masrentables <- parcial_anonimo %>%
+                  select(Cliente, Venta) %>%
+                  group_by(Cliente) %>%
+                  filter(Cliente %in% (clientes_mas$Cliente)) %>%
+                  summarise(ventas_totales = sum(Venta)) %>%
+                  arrange(desc(ventas_totales))
+```
+
 ## B
 
 ``` r

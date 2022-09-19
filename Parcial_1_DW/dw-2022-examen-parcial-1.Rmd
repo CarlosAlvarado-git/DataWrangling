@@ -134,7 +134,7 @@ Respuesta:
   SELECT * FROM A ___LEFT JOIN TableB___ B ON A.KEY = B.KEY WHERE __B.key__ __IS NULL__
 
 ## A 
-
+Recuerde correr código para ver el resultado final
 ```{r}
 ###resuelva acá
 parcial_anonimo <- readRDS("parcial_anonimo.rds")
@@ -143,20 +143,28 @@ parcial_anonimo <- readRDS("parcial_anonimo.rds")
 
 # Clientes restables con más ventas
 
-#total de clientes:
+#total de clientes: solo para saber cuantos hay
 parcial_anonimo %>% 
   select(Cliente) %>%
   summarise(total_cliente = n_distinct(Cliente)) 
 
-#Clientes agrupados con el pais:
+#Clientes agrupados con el pais: para tener los clientes y su pais
 cliente_paises <- parcial_anonimo %>% 
   select(Cliente, Pais) %>%
   group_by(Cliente, Pais) %>%
   summarise(entrega = n()) %>%
   arrange(desc(Cliente))
-
-
-
+# Clientes ccon más de un pais: cuento los clientes, y obtengo cuales llegan a estar en más de 1.
+clientes_mas <- cliente_paises %>%
+                count(Cliente) %>%
+                filter(n > 1)
+# Clientes más rentables: agarro toda la data y filtro por aquellos >1
+masrentables <- parcial_anonimo %>%
+                  select(Cliente, Venta) %>%
+                  group_by(Cliente) %>%
+                  filter(Cliente %in% (clientes_mas$Cliente)) %>%
+                  summarise(ventas_totales = sum(Venta)) %>%
+                  arrange(desc(ventas_totales))
 
 ```
 
@@ -164,12 +172,13 @@ cliente_paises <- parcial_anonimo %>%
 
 
 ## B
-
+Recuerde correr código para ver el resultado final
 ```{r}
 ###resuelva acá
 #B. Estrategia de negocio ha decidido que ya no operará en aquellos territorios cuyas pérdidas sean "considerables". Bajo su criterio, ¿cuáles son estos territorios y por qué ya no debemos operar ahí?
 
 # Se considerará un territorio con pérdidad considerables, aquellos que tengan el promedio de sus ventas por debajo de la media general. 
+
 parcial_anonimo <- readRDS("parcial_anonimo.rds")
 media_ventas <- parcial_anonimo %>%
                   select(Venta) %>%
