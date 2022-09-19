@@ -177,6 +177,8 @@ WHERE **B.key** **IS NULL**
 
 ## A
 
+Recuerde correr código para ver el resultado final
+
 ``` r
 ###resuelva acá
 parcial_anonimo <- readRDS("parcial_anonimo.rds")
@@ -185,7 +187,7 @@ parcial_anonimo <- readRDS("parcial_anonimo.rds")
 
 # Clientes restables con más ventas
 
-#total de clientes:
+#total de clientes: solo para saber cuantos hay
 parcial_anonimo %>% 
   select(Cliente) %>%
   summarise(total_cliente = n_distinct(Cliente)) 
@@ -195,7 +197,7 @@ parcial_anonimo %>%
     ## 1          2147
 
 ``` r
-#Clientes agrupados con el pais:
+#Clientes agrupados con el pais: para tener los clientes y su pais
 cliente_paises <- parcial_anonimo %>% 
   select(Cliente, Pais) %>%
   group_by(Cliente, Pais) %>%
@@ -207,11 +209,11 @@ cliente_paises <- parcial_anonimo %>%
     ## `.groups` argument.
 
 ``` r
-# Clientes ccon más de un pais
+# Clientes ccon más de un pais: cuento los clientes, y obtengo cuales llegan a estar en más de 1.
 clientes_mas <- cliente_paises %>%
                 count(Cliente) %>%
                 filter(n > 1)
-# Clientes más rentables
+# Clientes más rentables: agarro toda la data y filtro por aquellos >1
 masrentables <- parcial_anonimo %>%
                   select(Cliente, Venta) %>%
                   group_by(Cliente) %>%
@@ -222,11 +224,14 @@ masrentables <- parcial_anonimo %>%
 
 ## B
 
+Recuerde correr código para ver el resultado final
+
 ``` r
 ###resuelva acá
 #B. Estrategia de negocio ha decidido que ya no operará en aquellos territorios cuyas pérdidas sean "considerables". Bajo su criterio, ¿cuáles son estos territorios y por qué ya no debemos operar ahí?
 
 # Se considerará un territorio con pérdidad considerables, aquellos que tengan el promedio de sus ventas por debajo de la media general. 
+
 parcial_anonimo <- readRDS("parcial_anonimo.rds")
 media_ventas <- parcial_anonimo %>%
                   select(Venta) %>%
