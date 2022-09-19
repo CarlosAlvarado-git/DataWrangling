@@ -3,6 +3,7 @@ title: "dw-2022-parcial-1"
 author: "Tepi"
 date: "9/19/2022"
 output: rmarkdown::github_document
+always_allow_html: true
 
 ---
 ```{r}
@@ -89,11 +90,11 @@ Respuesta:
 # `str()` 
 #      R1: `dplyr`:``
 # `df[,c("a","b")]`
-#      R2: 
+#      R2: dplyr`:`select(df, a, b)`
 # `names(df)[4] <- "new_name"` donde la posición 4 corresponde a la variable `old_name`
 #      R3: `dplyr`:`rename(df, "new_name" = "old_name")`	
 # `df[df$variable == "valor",]`
-#      R4: 
+#      R4: `dplyr`:`filter(variable == "valor")`
 ```
       
 # 2. Al momento de filtrar en SQL, ¿cuál keyword cumple las mismas funciones que el keyword `OR`  para filtrar uno o más elementos una misma columna?
@@ -140,6 +141,7 @@ parcial_anonimo <- readRDS("parcial_anonimo.rds")
 
 #A. De los clientes que están en más de un país,¿cuál cree que es el más rentable y por qué?
 
+# Clientes restables con más ventas
 
 #total de clientes:
 parcial_anonimo %>% 
@@ -152,6 +154,8 @@ cliente_paises <- parcial_anonimo %>%
   group_by(Cliente, Pais) %>%
   summarise(entrega = n()) %>%
   arrange(desc(Cliente))
+
+
 
 
 ```
