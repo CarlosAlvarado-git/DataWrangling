@@ -46,7 +46,7 @@ feb + years(x=1)
 feb + dyears(x=1)
 
 jan <- dmy("31 jan 2022")
-jan + month(x=1)
+jan + years(x=1)
 
 #### 
 add_with_rollback(jan, months(x=1), roll_to_first = TRUE)
