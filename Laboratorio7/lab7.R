@@ -74,7 +74,7 @@ ay <- list(
   tickfont = list(color = "orange"),
   overlaying = "y",
   side = "right",
-  title = "Total"
+  title = "Margen operativo"
 )
 inv4 <- data %>%
   select(Cod,marge_venta) %>%
@@ -90,7 +90,7 @@ plot_ly(
   x=~Cod,
   y=~cantidad,
   type="bar",
-  name="Viajes"
+  name="Servicios por codigo"
 ) %>%
   add_trace(
     data=inv5,
@@ -98,10 +98,10 @@ plot_ly(
     y=~inv5$margen_venta,
     type="scatter",
     mode="lines+markers",
-    name="TOTAL",
+    name="Margen operativo promedio",
     yaxis="y2"
   ) %>%
-  layout(yaxis = list(title = 'Count'), 
+  layout(yaxis = list(title = 'Viajes'), 
          yaxis2 = ay)
 #### Correlación entre las variables
 # ver p valor 
