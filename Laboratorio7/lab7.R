@@ -77,11 +77,13 @@ ay <- list(
   title = "Margen operativo"
 )
 inv4 <- data %>%
-  select(Cod,marge_venta) %>%
+  select(Fecha,Cod,marge_venta) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
   group_by(Cod) %>%
   summarise(cantidad = n())
 inv5 <- data %>%
-  select(Cod,marge_venta) %>%
+  select(Fecha, Cod,marge_venta) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
   group_by(Cod) %>%
   summarise(margen_venta = mean(marge_venta))
 
@@ -106,12 +108,118 @@ plot_ly(
 #### Correlación entre las variables
 # ver p valor 
 base <- data %>%
-  select(directoCamion_5, directoPickup, directoMoto, fijoCamion_5, fijoPickup, fijoMoto, `5-30`, `30-45`, `45-75`, `75-120`, `120+`)
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  select(factura, marge_venta_porcostos,fijoCamion_5, fijoPickup, fijoMoto, `5-30`, `30-45`, `45-75`, `75-120`, `120+`)
+  
 rcorr(as.matrix(base))
 # la onda del p valor, todos 0. Estadístico significativo.
 ## grafica de correlación
 correlacion<-round(cor(base), 1)
 
 corrplot(correlacion, method="number", type="upper")
+#### servicios con camion, moto, pickup
+data %>%
+  select(Cod,Camion_5, Fecha) %>%
+  filter(Camion_5 > 0) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(viajes_camion = n()) %>%
+  arrange()
+data %>%
+  select(Cod,Pickup, Fecha) %>%
+  filter(Pickup > 0) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(viajes_pickup = n())%>%
+  arrange()
+data %>%
+  select(Cod,Moto, Fecha) %>%
+  filter(Moto > 0) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(viajes_moto = n())%>%
+  arrange()
+
+
+### Codigo maximo, media y minimo de margen operativo
+data %>%
+  select(Fecha, Cod, marge_venta_porcostos) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(minimo = min(marge_venta_porcostos), media = mean(marge_venta_porcostos), maximo = max(marge_venta_porcostos))
+
+quantile(data$marge_venta_porcostos)
+
+### Codigo maximo, media y minimo de costos fijos por camiono
+data %>%
+  select(Fecha, Cod, fijoCamion_5) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(minimo = min(fijoCamion_5), media = mean(fijoCamion_5), maximo = max(fijoCamion_5))
+fijocamion <- data %>%
+  select(Fecha,fijoMoto) %>%
+           filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+           filter(fijoMoto > 0)
+
+quantile(fijocamion$fijoMoto)
+mean(fijocamion$fijoMoto)
+min(fijocamion$fijoMoto)
+max(fijocamion$fijoMoto)
+
+directocamion <- data %>%
+  select(Fecha,costos) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-09-30"))) %>%
+  filter(costos > 0)
+
+quantile(directocamion$costos)
+mean(directocamion$costos)
+min(directocamion$costos)
+max(directocamion$costos)
+
+## facturas
+
+quantile(data$factura)
+
+#### servicios al mes
+
+viajes_mes <- data %>%
+  select(Fecha, Cod) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-09-30"))) %>%
+  group_by(month(Fecha), Cod) %>% 
+  summarise(cantidad_de_servicio = n())
+
+viajes_mes %>%
+  select(`month(Fecha)`, Cod, cantidad_de_servicio) %>%
+  group_by(Cod) %>% 
+  summarise(maximo = max(cantidad_de_servicio)) %>%
+  left_join(viajes_mes, by = c("maximo" = "cantidad_de_servicio")) %>%
+  select(`month(Fecha)`, Cod.x, maximo)
+
+viajes_mes %>%
+  select(`month(Fecha)`, Cod, cantidad_de_servicio) %>%
+  group_by(Cod) %>%
+  summarise(minimo = min(cantidad_de_servicio), )
+
+
+
+write.csv(viajes_mes, "viajes.csv", row.names = FALSE)
+data <- data %>%
+        mutate(costos = (Camion_5 + Pickup + Moto))
+
+data %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-09-30"))) %>%
+  select(origen, marge_venta_porcostos, factura, costos) %>%
+  group_by(origen) %>%
+  summarise(margen_tota = sum(marge_venta_porcostos),
+            margen_promedio = mean(marge_venta_porcostos),
+            factura_total = sum(factura),
+            factura_promedio = mean(factura),
+            costos_total = sum(costos),
+            costos_promedio = mean(costos))
+
+
+
+  
+
 
 
