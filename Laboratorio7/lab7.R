@@ -71,10 +71,22 @@ data <- data %>%
 data <- data %>%
   mutate(marge_venta_porcostos = (factura - (fijoCamion_5 + directoCamion_5+ fijoPickup +directoPickup+ fijoMoto+ directoMoto)))
 ay <- list(
-  tickfont = list(color = "orange"),
+  tickfont = list(color = "red"),
   overlaying = "y",
   side = "right",
-  title = "Margen operativo"
+  title = "Costo promedio por servicio"
+)
+ay2 <- list(
+  tickfont = list(color = "green"),
+  overlaying = "y",
+  side = "right",
+  title = "Margen promedio por servicio"
+)
+ay3 <- list(
+  tickfont = list(color = "black"),
+  overlaying = "y",
+  side = "right",
+  title = "Factura promedio por servicio"
 )
 inv4 <- data %>%
   select(Fecha,Cod,marge_venta) %>%
@@ -82,10 +94,21 @@ inv4 <- data %>%
   group_by(Cod) %>%
   summarise(cantidad = n())
 inv5 <- data %>%
-  select(Fecha, Cod,marge_venta) %>%
+  select(Fecha, Cod,costos) %>%
   filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
   group_by(Cod) %>%
-  summarise(margen_venta = mean(marge_venta))
+  summarise(costos = mean(costos))
+inv6 <- data %>%
+  select(Fecha, Cod,marge_venta_porcostos) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(marge_venta_porcostos = mean(marge_venta_porcostos))
+inv7 <- data %>%
+  select(Fecha, Cod,factura) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(factura = mean(factura))
+
 
 plot_ly(
   data=inv4,
@@ -97,14 +120,34 @@ plot_ly(
   add_trace(
     data=inv5,
     x=~inv5$Cod,
-    y=~inv5$margen_venta,
+    y=~inv5$costos,
     type="scatter",
     mode="lines+markers",
-    name="Margen operativo promedio",
+    name="costo promedio",
+    yaxis="y2"
+  ) %>%
+  add_trace(
+    data=inv6,
+    x=~inv6$Cod,
+    y=~inv6$marge_venta_porcostos,
+    type="scatter",
+    mode="lines+markers",
+    name="margen promedio",
+    yaxis="y2"
+  ) %>%
+  add_trace(
+    data=inv7,
+    x=~inv7$Cod,
+    y=~inv7$factura,
+    type="scatter",
+    mode="lines+markers",
+    name="factura promedio",
     yaxis="y2"
   ) %>%
   layout(yaxis = list(title = 'Viajes'), 
-         yaxis2 = ay)
+         yaxis2 = ay,
+         yaxis3 = ay2,
+         yaxis4 = ay3)
 #### Correlación entre las variables
 # ver p valor 
 base <- data %>%
@@ -206,18 +249,22 @@ write.csv(viajes_mes, "viajes.csv", row.names = FALSE)
 data <- data %>%
         mutate(costos = (Camion_5 + Pickup + Moto))
 
-data %>%
+postes_analisis <- data %>%
   filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-09-30"))) %>%
-  select(origen, marge_venta_porcostos, factura, costos) %>%
-  group_by(origen) %>%
-  summarise(margen_tota = sum(marge_venta_porcostos),
+  select(ID, marge_venta_porcostos, factura, costos) %>%
+  group_by(ID) %>%
+  summarise(viajes = n(), 
+            margen_tota = sum(marge_venta_porcostos),
             margen_promedio = mean(marge_venta_porcostos),
             factura_total = sum(factura),
             factura_promedio = mean(factura),
             costos_total = sum(costos),
-            costos_promedio = mean(costos))
+            costos_promedio = mean(costos)) %>%
+  arrange(desc(viajes))
 
 
+
+quantile(postes_analisis$viajes)
 
   
 
