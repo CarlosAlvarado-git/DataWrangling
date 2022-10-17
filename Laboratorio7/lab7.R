@@ -200,9 +200,9 @@ data %>%
   group_by(Cod) %>%
   summarise(minimo = min(fijoCamion_5), media = mean(fijoCamion_5), maximo = max(fijoCamion_5))
 fijocamion <- data %>%
-  select(Fecha,fijoMoto) %>%
+  select(Fecha,directoMoto) %>%
            filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
-           filter(fijoMoto > 0)
+           filter(directoMoto > 0)
 
 quantile(fijocamion$fijoMoto)
 mean(fijocamion$fijoMoto)
@@ -230,18 +230,15 @@ viajes_mes <- data %>%
   filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-09-30"))) %>%
   group_by(month(Fecha), Cod) %>% 
   summarise(cantidad_de_servicio = n())
+library(ggplot2)
+ggplot(viajes_mes, aes(fill=`month(Fecha)`, y = viajes_mes$Cod, x = viajes_mes$cantidad_de_servicio)) +
+  geom_bar(position="stack", stat="identity") +
+  xlab("Cantidad de viajes") +
+  ylab("Codigo de servicio") +
+  ggtitle("Cantidad de servicios realizados al mes")
 
-viajes_mes %>%
-  select(`month(Fecha)`, Cod, cantidad_de_servicio) %>%
-  group_by(Cod) %>% 
-  summarise(maximo = max(cantidad_de_servicio)) %>%
-  left_join(viajes_mes, by = c("maximo" = "cantidad_de_servicio")) %>%
-  select(`month(Fecha)`, Cod.x, maximo)
 
-viajes_mes %>%
-  select(`month(Fecha)`, Cod, cantidad_de_servicio) %>%
-  group_by(Cod) %>%
-  summarise(minimo = min(cantidad_de_servicio), )
+
 
 
 
@@ -251,6 +248,7 @@ data <- data %>%
 
 postes_analisis <- data %>%
   filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-09-30"))) %>%
+  filter(Cod == "OTRO") %>%
   select(ID, marge_venta_porcostos, factura, costos) %>%
   group_by(ID) %>%
   summarise(viajes = n(), 
@@ -260,13 +258,28 @@ postes_analisis <- data %>%
             factura_promedio = mean(factura),
             costos_total = sum(costos),
             costos_promedio = mean(costos)) %>%
-  arrange(desc(viajes))
+  arrange(desc(viajes)) %>%
+  Filter()
 
 
 
 quantile(postes_analisis$viajes)
 
   
+data %>%
+  select(Fecha,Cod,factura, costos, marge_venta_porcostos) %>%
+  filter(Fecha %within% interval(ymd("2017-01-01"), ymd("2017-10-01"))) %>%
+  group_by(Cod) %>%
+  summarise(viajes = n(), 
+            margen_total = sum(marge_venta_porcostos),
+            factura_total = sum(factura),
+            costos_total = sum(costos),
+            margen_promedio = mean(marge_venta_porcostos)) %>%
+  arrange(desc(margen_total))  
+
+ids <- unique(data$ID)
+length()
 
 
-
+a <- data %>%
+  filter(directoCamion_5 == 0.58)
