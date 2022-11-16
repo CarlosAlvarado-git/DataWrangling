@@ -8,7 +8,7 @@ generate_df <-  function(tamanio, x){ return(
 # luego pongo la función
 # puedo agregar varios parámetros después
 a <- c(1,2,3)
-lista <- lapply(4, generate_df,1:3) 
+lista <- lapply(4, generate_df,a) 
 lista
 
 ###

@@ -3,7 +3,7 @@
     "path": "~/Desktop/DataWrangling/Clase_3/Clase_3/clase_3_lapply_funciones.R",
     "project_path": "clase_3_lapply_funciones.R",
     "type": "r_source",
-    "hash": "2211681304",
+    "hash": "2302493421",
     "contents": "",
     "dirty": false,
     "created": 1659555048634.0,
@@ -13,15 +13,15 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "29,0",
-        "scrollLine": "9"
+        "cursorPosition": "17,20",
+        "scrollLine": "15"
     },
     "folds": "",
-    "lastKnownWriteTime": 1659741460,
+    "lastKnownWriteTime": 1668611712,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1659741460058,
+    "last_content_update": 1668611712311,
     "read_only": false,
     "read_only_alternatives": []
 }
