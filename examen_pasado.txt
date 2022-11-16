@@ -48,15 +48,41 @@ paste0("Mis preguntas a resolver son: ",paste0(preguntas,collapse = ", "))
     
     
 2. Al momento de filtrar en SQL, ¿cuál keyword cumple las mismas funciones que el keyword `OR`  para filtrar uno o más elementos una misma columna?
+
 3. ¿Por qué en R utilizamos funciones de la familia apply (lapply,vapply) en lugar de utilizar ciclos?
+
+lapply(4, generate_df,1:3) el 4 es el primer parámetro, el generate es la función, y luego los demás parámetros
+    parecido por un for, es un ciclo que aplica a todos los elementos del vector.
+    1:4, recorre y realiza la función a cada dato que pongo en el primer parámetro
+    el primer parámetro de lapply es el primer parámetro que recibe la función. 
+    luego pongo la función
+    puedo agregar varios parámetros después
+
 4. ¿Cuál es la diferencia entre utilizar `==` y `=` en R?
+
+   El == es de comparar los valores y el = es el asignar un valor, que también se puede escribir como <-
+
 5. ¿Cuál es la forma correcta de cargar un archivo de texto donde el delimitador es `:`?
+
+            txt_1 <-read_delim('example_3.txt', delim = ";")
+
 6. ¿Qué es un vector y en qué se diferencia en una lista en R?
+
+   A list holds different data such as Numeric, Character, logical, etc. Vector stores elements of the same type or converts implicitly.
+   The vector is one-dimensional, whereas the list is a multidimensional object.
+   
 7. ¿Qué pasa si quiero agregar una nueva categoría a un factor que no se encuentra en los niveles existentes?
+   
+   Si quiero agregar al factor un nuevo valor, que no esté en los niveles, primero debo de volver a crear el factor, pero ya con ese nueva categoría, que 
+   al realizar la función factor, me añadirá el level. 
+
 8. Si en un dataframe, a una variable de tipo `factor` le agrego un nuevo elemento que *no se encuentra en los niveles existentes*, ¿cuál sería el resultado esperado y por qué?
     * El nuevo elemento
     * `NA`
 9. En SQL, ¿para qué utilizamos el keyword `HAVING`?
+   
+   The HAVING clause was added to SQL because the WHERE keyword cannot be used with aggregate functions.
+
 10. Si quiero obtener como resultado las filas de la tabla A que no se encuentran en la tabla B, ¿cómo debería de completar la siguiente sentencia de SQL?
 
     * SELECT * FROM A _______ B ON A.KEY = B.KEY WHERE __________ = __________
@@ -133,63 +159,4 @@ Respuesta: En SQL la keyword HAVING es como un where o una forma de realizar
 Respuesta: 
   SELECT * FROM A ___LEFT JOIN TableB___ B ON A.KEY = B.KEY WHERE __B.key__ __IS NULL__
 
-## A 
-Recuerde correr código para ver el resultado final
-```{r}
-###resuelva acá
-parcial_anonimo <- readRDS("parcial_anonimo.rds")
 
-#A. De los clientes que están en más de un país,¿cuál cree que es el más rentable y por qué?
-
-# Clientes restables con más ventas
-
-#total de clientes: solo para saber cuantos hay
-parcial_anonimo %>% 
-  select(Cliente) %>%
-  summarise(total_cliente = n_distinct(Cliente)) 
-
-#Clientes agrupados con el pais: para tener los clientes y su pais
-cliente_paises <- parcial_anonimo %>% 
-  select(Cliente, Pais) %>%
-  group_by(Cliente, Pais) %>%
-  summarise(entrega = n()) %>%
-  arrange(desc(Cliente))
-# Clientes ccon más de un pais: cuento los clientes, y obtengo cuales llegan a estar en más de 1.
-clientes_mas <- cliente_paises %>%
-                count(Cliente) %>%
-                filter(n > 1)
-# Clientes más rentables: agarro toda la data y filtro por aquellos >1
-masrentables <- parcial_anonimo %>%
-                  select(Cliente, Venta) %>%
-                  group_by(Cliente) %>%
-                  filter(Cliente %in% (clientes_mas$Cliente)) %>%
-                  summarise(ventas_totales = sum(Venta)) %>%
-                  arrange(desc(ventas_totales))
-
-```
-
-
-
-
-## B
-Recuerde correr código para ver el resultado final
-```{r}
-###resuelva acá
-#B. Estrategia de negocio ha decidido que ya no operará en aquellos territorios cuyas pérdidas sean "considerables". Bajo su criterio, ¿cuáles son estos territorios y por qué ya no debemos operar ahí?
-
-# Se considerará un territorio con pérdidad considerables, aquellos que tengan el promedio de sus ventas por debajo de la media general. 
-
-parcial_anonimo <- readRDS("parcial_anonimo.rds")
-media_ventas <- parcial_anonimo %>%
-                  select(Venta) %>%
-                  summarise(ventas_promedio = mean(Venta))
-
-Territorias_fuera <- parcial_anonimo %>%
-                      select(Territorio, Venta) %>%
-                      group_by(Territorio) %>%
-                      summarise(promedio_territorio = mean(Venta)) %>%
-                      filter(promedio_territorio < media_ventas[1,1])
-library(DT)
-
-DT::datatable(Territorias_fuera)
-```
